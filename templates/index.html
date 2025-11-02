@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fire Alarm Battery Calculator</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔥 Fire Alarm Battery Calculator</h1>
+
+      <form id="calculatorForm">
+        <div class="section">
+          <h2>System Loads</h2>
+
+          <div class="input-group">
+            <label for="quiescent_load">Quiescent Load (mA)</label>
+            <input
+              type="number"
+              id="quiescent_load"
+              name="quiescent_load"
+              step="0.01"
+              value=""
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="alarm_load">Alarm Load (mA)</label>
+            <input
+              type="number"
+              id="alarm_load"
+              name="alarm_load"
+              step="0.01"
+              value=""
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="standby_period">Standby Period (hrs)</label>
+            <select id="standby_period" name="standby_period" required>
+              <option value="">Select standby period...</option>
+              <option value="24">24 hours</option>
+              <option value="48">48 hours</option>
+              <option value="72">72 hours</option>
+              <option value="96">96 hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="calculate-btn">Calculate</button>
+          <button type="button" class="reset-btn" onclick="resetForm()">
+            Reset
+          </button>
+        </div>
+      </form>
+
+      <div id="results" class="results hidden">
+        <h2>📊 Results</h2>
+
+        <div class="result-item">
+          <span class="result-label">Standby Capacity:</span>
+          <span>
+            <span id="standby_capacity" class="result-value"></span>
+            <span class="result-unit">mAh</span>
+          </span>
+        </div>
+
+        <div class="result-item">
+          <span class="result-label">Operational Capacity:</span>
+          <span>
+            <span id="operational_capacity" class="result-value"></span>
+            <span class="result-unit">mAh</span>
+          </span>
+        </div>
+
+        <div class="result-item">
+          <span class="result-label">Operational Duration:</span>
+          <span>
+            <span id="operational_duration" class="result-value"></span>
+            <span class="result-unit">hrs</span>
+          </span>
+        </div>
+
+        <div class="result-item highlight">
+          <span class="result-label">Minimum Required Capacity:</span>
+          <span>
+            <span id="minimum_required_capacity" class="result-value"></span>
+            <span class="result-unit">Ah</span>
+          </span>
+        </div>
+
+        <div class="result-item highlight">
+          <span class="result-label">Battery Size Required:</span>
+          <span>
+            <span id="battery_size_required" class="result-value"></span>
+            <span class="result-unit">Ah</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("calculatorForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(this);
+
+          try {
+            const response = await fetch("/calculate", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+              alert("Error: " + data.error);
+              return;
+            }
+
+            // Update results
+            document.getElementById("standby_capacity").textContent =
+              data.standby_capacity;
+            document.getElementById("operational_capacity").textContent =
+              data.operational_capacity;
+            document.getElementById("operational_duration").textContent =
+              data.operational_duration;
+            document.getElementById("minimum_required_capacity").textContent =
+              data.minimum_required_capacity;
+
+            // Handle battery size result
+            const batterySizeElement = document.getElementById(
+              "battery_size_required"
+            );
+            const batterySizeItem = batterySizeElement.closest(".result-item");
+
+            if (data.battery_size_required === null) {
+              batterySizeElement.textContent = "NO BATTERY AVAILABLE";
+              batterySizeElement.style.color = "#ff4444";
+              batterySizeItem.style.borderColor = "#ff4444";
+            } else {
+              batterySizeElement.textContent = data.battery_size_required;
+              batterySizeElement.style.color = "#ff6b6b";
+              batterySizeItem.style.borderColor = "#ff6b6b";
+            }
+
+            // Show results
+            document.getElementById("results").classList.remove("hidden");
+
+            // Scroll to results
+            document
+              .getElementById("results")
+              .scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } catch (error) {
+            alert("Error calculating results. Please try again.");
+            console.error("Error:", error);
+          }
+        });
+      function resetForm() {
+        // Reset the form fields
+        document.getElementById("calculatorForm").reset();
+
+        // Hide the results
+        document.getElementById("results").classList.add("hidden");
+      }
+    </script>
+  </body>
+</html>
