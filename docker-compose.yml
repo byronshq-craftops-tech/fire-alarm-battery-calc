@@ -6,7 +6,7 @@ services:
     container_name: fire-alarm-battery-calc
     restart: unless-stopped
     networks:
-      - traefik
+      - n8n-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.fire-alarm-calc.rule=Host(`battery.craftopstech.com`)"
@@ -15,5 +15,5 @@ services:
       - "traefik.http.services.fire-alarm-calc.loadbalancer.server.port=5000"
 
 networks:
-  traefik:
+  n8n-network:
     external: true
