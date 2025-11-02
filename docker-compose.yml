@@ -9,8 +9,9 @@ services:
       - n8n-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=n8n-network"
       - "traefik.http.routers.fire-alarm-calc.rule=Host(`battery.craftopstech.com`)"
-      - "traefik.http.routers.fire-alarm-calc.entrypoints=websecure"
+      - "traefik.http.routers.fire-alarm-calc.tls=true"
       - "traefik.http.routers.fire-alarm-calc.tls.certresolver=letsencrypt"
       - "traefik.http.services.fire-alarm-calc.loadbalancer.server.port=5000"
 
