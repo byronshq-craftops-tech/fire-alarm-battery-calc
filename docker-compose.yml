@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  fire-alarm-calc:
+    build: .
+    container_name: fire-alarm-battery-calc
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fire-alarm-calc.rule=Host(`battery.craftopstech.com`)"
+      - "traefik.http.routers.fire-alarm-calc.entrypoints=websecure"
+      - "traefik.http.routers.fire-alarm-calc.tls.certresolver=letsencrypt"
+      - "traefik.http.services.fire-alarm-calc.loadbalancer.server.port=5000"
+
+networks:
+  traefik:
+    external: true
